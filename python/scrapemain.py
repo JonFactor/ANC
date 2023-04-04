@@ -7,7 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 from collections import OrderedDict 
-import re
+import re, json
 
 # WebDriverWait(web, 100).until(EC.visibility_of_element_located(By.CLASS_NAME, 'asd'))
 # https://mahoningctc.com/all-staff-directory/
@@ -31,42 +31,48 @@ f = 0
 y = 0
 z = True
 l = True
-while l:
-    j = True
-    while j:
-        try:
-            click = web.find_elements(By.TAG_NAME, value='h3')[y]
-            click.click()
-            pg = web.page_source
-            for match in re.finditer(ex, pg):
-                emails.append(match.group())
-            y += 1
-            z = True
-            l = False
-            break
-        except:
-            y += 1
-            pass
-    while z:
-        try:
-            htag = web.find_elements(By.TAG_NAME, value='a')[f]
-            g = htag.get_attribute('href')
-            web.get(g)
-            pg = web.page_source
-            for match in re.finditer(ex, pg):
-                emails.append(match.group())
-            f += 1
-            web.back()
-        except Exception:
-            for i, fix in enumerate(emails):
-                if fix not in printed:
-                    print(fix)
-                    printed.append(fix)
-            print('NO MORE HREFS')
-            l = True
-            f = 0
-            web.back()
-            z = False
+try:    
+    while l:
+        j = True
+        while j:
+            try:
+                click = web.find_elements(By.TAG_NAME, value='h3')[y]
+                click.click()
+                pg = web.page_source
+                for match in re.finditer(ex, pg):
+                    emails.append(match.group())
+                y += 1
+                z = True
+                l = False
+                break
+            except:
+                y += 1
+                pass
+        while z:
+            try:
+                htag = web.find_elements(By.TAG_NAME, value='a')[f]
+                g = htag.get_attribute('href')
+                web.get(g)
+                pg = web.page_source
+                for match in re.finditer(ex, pg):
+                    emails.append(match.group())
+                f += 1
+                web.back()
+            except Exception:
+                for i, fix in enumerate(emails):
+                    if fix not in printed:
+                        print(fix)
+                        printed.append(fix)
+                print('NO MORE HREFS')
+                l = True
+                f = 0
+                web.back()
+                z = False
+except KeyboardInterrupt:
+    pass
 
 # outside()
 # inside()
+
+with open('./result.json', 'w') as file:
+    json.dump(printed, file)
