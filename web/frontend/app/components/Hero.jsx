@@ -1,6 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
-import styles from '../page.module.css'
+import styles from './comps.css'
 import Link from 'next/link'
 
 const Hero = () => (
@@ -11,7 +11,7 @@ const Hero = () => (
         </div>
         <div className=' flex flex-row'>
             <div id='first-header' className=' flex flex-col ml-80 mt-44 relative'>
-            <div className='circle-1 absolute w-32 rounded-full aspect-square  -ml-14 -mt-[60px]' />
+            <div className='circle-1 absolute w-32 rounded-full aspect-square -ml-14 -mt-[60px]' />
             <button className=' ml-[340px] w-24 h-6 bg-[#C8B65B] text-black font-semibold'> Login </button>
             <div className=' text-5xl font-bold'>
                 <h1>Explore the cosmos</h1>
