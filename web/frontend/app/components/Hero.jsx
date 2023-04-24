@@ -35,9 +35,9 @@ const Hero = () => (
             <div className=' bg-[#353E8E] rounded-full w-[523px] aspect-square -ml-64 -mt-24 absolute blur-[2px]' />
             <div className=' flex flex-col items-center w-screen'>
             <div className=' mt-24 flex flex-row'>
-                <Link href='/' className=' text-[#5A42D4] hover:underline font-semilight' >View our quick start guide </Link>
+                <Link href='/' className=' text-[#5A42D4] hover:underline font-semilight' >View our quick start guide &#8594;</Link>
                 <div className=' ml-2 w-5 h-4 relative mt-1'>
-                <Image src='/arrow.png' fill />
+                    
                 </div>
             </div>
             
