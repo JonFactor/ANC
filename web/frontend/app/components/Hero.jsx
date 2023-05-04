@@ -11,20 +11,23 @@ const Hero = () => (
         </div>
         <div className=' flex flex-row'>
             <div id='first-header' className=' flex flex-col ml-80 mt-44 relative'>
-            <div className='circle-1 absolute w-32 rounded-full aspect-square -ml-14 -mt-[60px]' />
-            <button className=' ml-[340px] w-24 h-6 bg-[#C8B65B] text-black font-semibold'> Login </button>
+            <div className='circle-1 absolute w-32 rounded-full aspect-square -ml-14 -mt-[50px]' />
             <div className=' text-5xl font-bold'>
                 <h1>Explore the cosmos</h1>
                 <h1>create connections.</h1>          
             </div>
-            <p className=' w-[290px] mt-4 font-light text-lg'>
+            <p className=' w-[290px] mt-4 font-light text-lg bg-clip-text text-transparent'>
                 Effortlessly gather email addresses
                 from the galaxy with our cutting-edge 
                 web scraping tools.
             </p>
-            <div className=' flex flex-row mt-6 ml-16 space-x-8 text-lg'> 
-                <button className=' w-32 h-12 bg-[#5A42D5] rounded-md'>Get Started</button>
-                <button className=' w-32 h-12 border-[#5A42D5] border-[3px] rounded-md text-[#5A42D5]'>Buy Now</button>
+            <div className=' flex flex-row mt-6 space-x-8 text-lg '> 
+                <button className=' w-32 h-10 bg-[#5A42D5] rounded-md'>Get Started</button>
+                <button className=' w-32 h-10  rounded-md bg-gradient-to-r from-purple-700 to-blue-600'>
+                    <div className=' p-1 bg-black rounded-md'>
+                        <p>Try Now!</p>
+                    </div>
+                </button>
             </div>
             </div>
             <div className=' relative ml-96  w-96 h-[370px] mt-60 '>
