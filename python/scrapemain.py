@@ -24,9 +24,6 @@ ex = r'''(?:[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*|
 emails = []
 printed = []
 
-# def outside():
-
-# def inside():
 f = 0
 y = 0
 z = True
@@ -73,6 +70,3 @@ except KeyboardInterrupt:
 
 # outside()
 # inside()
-
-with open('./result.json', 'w') as file:
-    json.dump(printed, file)
