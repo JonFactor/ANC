@@ -1,0 +1,2 @@
+
+django - react auth: https://blog.devgenius.io/django-rest-framework-react-authentication-workflow-2022-part-2-d299b7fef875 
