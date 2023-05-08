@@ -20,6 +20,8 @@ import time
 from collections import OrderedDict 
 import re, json
 
+#models
+from .models import Result
 
 def scrap(request, search="mcctc staff directory"):
 
@@ -88,7 +90,7 @@ def scrap(request, search="mcctc staff directory"):
     driver.quit()
 
     # handle results
-
+    
     return driver
 
 
