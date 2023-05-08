@@ -21,12 +21,12 @@ const Hero = () => (
                 web scraping tools.
             </p>
             <div className=' flex flex-row mt-6 space-x-8 text-md '> 
-                <Link className=' w-32 h-10 bg-purple-700 rounded-md text-center justify-center' href='/signup'>
+                <Link className=' w-32 h-10 bg-[#5A42D4] rounded-md text-center justify-center' href='/signup'>
                     <p className=' mt-2'>Get Started</p>
                 </Link>
                 <div>
-                    <button className=' w-32 h-10 bg-transparent border-2 border-purple-600 rounded-md'>
-                        <p className=' text-purple-500'>Try Now</p>
+                    <button className=' w-32 h-10 bg-transparent border-2 border-[#5A42D4] rounded-md'>
+                        <p className=' text-[#5A42D4]'>Try Now</p>
                     </button>                    
                 </div>
 
