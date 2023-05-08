@@ -28,9 +28,9 @@ const Quickstart = () => {
                     </p>                
                 </div>
                 <div className=' mt-12 flex flex-row space-x-8'>
-                    <button className=' rounded-3xl bg-purple-700 w-44 h-12'> How it all works</button>
-                    <button className=' rounded-3xl border-[#5A42D4] border-2 w-44 h-12'> Ease of use</button>
-                    <button className=' rounded-3xl border-[#5A42D4] border-2 w-44 h-12'> Create links</button>
+                    <button className=' rounded-3xl bg-[#5A42D4] w-44 h-12'> How it Works</button>
+                    <button className=' rounded-3xl border-[#5A42D4] border-[2px] w-44 h-12'> Ease of Use</button>
+                    <button className=' rounded-3xl border-[#5A42D4] border-[2px] w-44 h-12'> Create Links</button>
                 </div>
                 <div className=' flex flex-row space-x-24 mt-24'>
                     <div className=' flex flex-col space-y-12'>
