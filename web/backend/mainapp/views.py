@@ -23,7 +23,7 @@ import re, json
 #models
 from .models import Result
 
-def scrap(request, search="linkedin software engineer"):
+def scrap(request, search="random emails"):
 
     # driver stuff
     options = Options()

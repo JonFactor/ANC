@@ -1,3 +1,3 @@
-
-django - react auth: https://blog.devgenius.io/django-rest-framework-react-authentication-workflow-2022-part-2-d299b7fef875 (explains in detail)
+django - react auth pt1: https://sushil-kamble.medium.com/django-rest-framework-react-authentication-workflow-2022-part-1-a21f22b3f358 
+django - react auth pt2: https://blog.devgenius.io/django-rest-framework-react-authentication-workflow-2022-part-2-d299b7fef875 (explains in detail)
 django webscraper viewpage: https://dev.to/mdrhmn/web-scraping-using-django-and-selenium-3ecg (hard to follow)
