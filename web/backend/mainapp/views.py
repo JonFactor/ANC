@@ -23,7 +23,7 @@ import re, json
 #models
 from .models import Result
 
-def scrap(request, search="mcctc staff directory"):
+def scrap(request, search="linkedin software engineer"):
 
     # driver stuff
     options = Options()
