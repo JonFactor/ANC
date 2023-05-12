@@ -40,6 +40,7 @@ while z:
         if fix not in printed:
             print(fix)
             printed.append(fix)
+    if i > 10: z = false
     f+1
     time.sleep(2)
     web.back()
