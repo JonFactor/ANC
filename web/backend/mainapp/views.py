@@ -5,25 +5,20 @@ from django.shortcuts import redirect
 def mainapp(request):
     return render(request, 'mainapp.html', {})
 
-def display(request):
-    return render(request, 'display.html', {})
+def display(request, totalEmails = ''):
+    return render(request, 'display.html', {totalEmails})
 
 # Selenium
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-import time
-from collections import OrderedDict 
-import re, json
+import re
 
 #models
 from .models import Result
 
-def scrap(request, search="random emails"):
+def scrap(request, perPgLimit = 3, siteLimit = 5, search="random emails"):
 
     # driver stuff
     options = Options()
@@ -32,137 +27,63 @@ def scrap(request, search="random emails"):
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 
     #prequeists 
-    url = 'https://maya.um.edu.my/sitsvision/wrd/siw_lgn'
-    ex = r'''(?:[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])'''
-    emails = []
-    printed = []
-    f = 0
-    y = 0
-    z = True
-    l = True
+    regexEmail = r'''(?:[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])'''
+    totalEmails = []
+    totalSiteIter = 0
+    pastPageLoop = True
+    containerLoop = True
 
-    # start driver
+    def emailFinding(pgEmails, pgSrc):
+        for match in re.finditer(regexEmail, pgSrc):
+            if len(pgEmails) >= perPgLimit: break
+            else: pgEmails.append(match.group())
+
     driver.get('https://www.google.com/search?q='+search)
-
-    # meat
-
-    while l:
-        j = True
-        success = 0
-        while j:
+    while containerLoop:
+        initialPageLoop = True
+        thisSiteIter = 0
+        while initialPageLoop:
             try:
-                click = driver.find_elements(By.TAG_NAME, value='h3')[y]
-                click.click()
-                pg = driver.page_source
-                for match in re.finditer(ex, pg):
-                    emails.append(match.group())
-                y += 1
-                z = True
-                l = False
-                success += 1
+                driver.find_elements(By.TAG_NAME, value='h3')[thisSiteIter].click()
+                pgEmails = []
+                pgSrc = driver.page_source
+                emailFinding(pgEmails, pgSrc)
+                thisSiteIter += 1
+                totalSiteIter += 1
+                containerLoop = False
+                totalEmails.append(pgEmails)
+                if totalSiteIter >= siteLimit: 
+                    if pgEmails != [] or '' or pgEmails not in totalEmails: 
+                        totalEmails.append(pgEmails)
+                        initialPageLoop = False
+                        pastPageLoop = False
+                        containerLoop = False
+                    break
                 break
-            except:
-                y += 1
-                pass
-            if success >= 5: break
-        while z:
+            except Exception: pass
+        thisSiteIter = 0
+        while pastPageLoop:
             try:
-                htag = driver.find_elements(By.TAG_NAME, value='a')[f]
-                g = htag.get_attribute('href')
-                driver.get(g)
-                pg = driver.page_source
-                for match in re.finditer(ex, pg):
-                    emails.append(match.group())
-                f += 1
+                driver.get(driver.find_elements(By.TAG_NAME, value='a')[thisSiteIter].get_attribute('href'))
+                if driver.current_url == 'data:,': continue
+                if totalSiteIter >= siteLimit: 
+                    if pgEmails != [] or '' or pgEmails not in totalEmails: 
+                        totalEmails.append(pgEmails)
+                        initialPageLoop = False
+                        pastPageLoop = False
+                        containerLoop = False
+                    break
+                pgEmails = []
+                pgSrc = driver.page_source
+                emailFinding(pgEmails, pgSrc)
+                thisSiteIter += 1
+                totalSiteIter += 1
+                if pgEmails != [] or '': totalEmails.append(pgEmails)
                 driver.back()
             except Exception:
-                for i, fix in enumerate(emails):
-                    if fix not in printed:
-                        print(fix)
-                        printed.append(fix)
-                print('NO MORE HREFS')
-                l = True
-                f = 0
+                containerLoop = True
+                pastPageLoop = False
                 driver.back()
-                z = False
-
-    # end driver
     driver.quit()
 
-    # handle results
-    redirect('/')
-    return driver
-
-
-
-
-
-
-
-
-# def scrap(search = "mcctc staff directory ", limitLinks = 5):
-
-#     from selenium import webdriver
-#     from selenium.webdriver.chrome.service import Service
-#     from webdriver_manager.chrome import ChromeDriverManager
-#     from selenium.webdriver.common.by import By
-#     from selenium.webdriver.chrome.options import Options
-#     import re
-#     import time
-
-#     opt = Options()
-#     opt.headless = False
-#     web = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=opt)
-#     web.get('https://www.google.com/search?q='+search)
-
-#     ex = r'''(?:[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])'''
-
-#     emails = []
-#     printed = []
-
-#     f = 0
-#     y = 0
-#     z = True
-#     l = True    
-#     while l:
-#         j = True
-#         sucess = 0
-#         while j:
-#             try:
-#                 click = web.find_elements(By.TAG_NAME, value='h3')[y]
-#                 click.click()
-#                 pg = web.page_source
-#                 for match in re.finditer(ex, pg):
-#                     emails.append(match.group())
-#                 y += 1
-#                 z = True
-#                 l = False
-#                 sucess += 1
-#                 if sucess >= limitLinks: break
-#                 break
-#             except:
-#                 y += 1
-#                 pass
-#         while z:
-#             try:
-#                 htag = web.find_elements(By.TAG_NAME, value='a')[f]
-#                 g = htag.get_attribute('href')
-#                 web.get(g)
-#                 pg = web.page_source
-#                 for match in re.finditer(ex, pg):
-#                     emails.append(match.group())
-#                 f += 1
-#                 web.back()
-#             except Exception:
-#                 for i, fix in enumerate(emails):
-#                     if fix not in printed:
-#                         print(fix)
-#                         printed.append(fix)
-#                 print('NO MORE HREFS')
-#                 l = True
-#                 f = 0
-#                 web.back()
-#                 z = False
-
-# outside()
-# inside()
+    return render(request, 'display.html', {'totalEmails': totalEmails})
