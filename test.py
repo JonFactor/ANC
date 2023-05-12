@@ -1,17 +1,19 @@
 # Selenium
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-import time
-from collections import OrderedDict 
-import re, json
+import re
 
+" WHY ASSIGNEMT NOW "
+""""
+Normally we would put assignet as close as we can to when we use
+the varible for readablity, but selenium is demanding 
+like by step dad and will beat us if we do even the 
+simplist of operations while hes drinkn... i mean runing. 
+"""
 
- # driver stuff
+# driver stuff
 options = Options()
 options.headless = False
 options.add_argument("--window-size=1920,1080")
@@ -19,59 +21,77 @@ driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 
 #prequeists 
 url = 'https://maya.um.edu.my/sitsvision/wrd/siw_lgn'
-ex = r'''(?:[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])'''
-emails = []
-printed = []
-f = 0
-y = 0
-z = True
-l = True
+regexEmail = r'''(?:[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])'''
+totalEmails = []
+printedEmails = []
+totalSiteIter = 0
+pastPageLoop = True
+containerLoop = True
 
-search="mcctc staff directory"
+# params
+perPgLimit = 5
+siteLimit = 3
+search="random emails"
+
+def emailFinding(pgEmails, pgSrc):
+    for match in re.finditer(regexEmail, pgSrc):
+        if len(pgEmails) >= perPgLimit: 
+            break
+        else:
+            pgEmails.append(match.group())
+
+def totalSiteCheck():
+    global totalSiteIter, siteLimit, pgEmails, totalEmails, initialPageLoop, pastPageLoop, containerLoop
+    if totalSiteIter >= siteLimit: 
+        if pgEmails != [] or '': 
+            if pgEmails not in totalEmails:
+                totalEmails.append(pgEmails)
+            initialPageLoop = False
+            pastPageLoop = False
+            containerLoop = False
+            return True
+        return True
+    else:
+        return False
+
 # start driver
 driver.get('https://www.google.com/search?q='+search)
 
 # meat
-
-while l:
-    j = True
-    success = 0
-    while j:
+while containerLoop:
+    initialPageLoop = True
+    thisSiteIter = 0
+    while initialPageLoop:
         try:
-            click = driver.find_elements(By.TAG_NAME, value='h3')[y]
-            click.click()
-            pg = driver.page_source
-            for match in re.finditer(ex, pg):
-                emails.append(match.group())
-            y += 1
-            z = True
-            l = False
-            success += 1
+            websiteClicky = driver.find_elements(By.TAG_NAME, value='h3')[thisSiteIter].click()
+            pgEmails = []
+            pgSrc = driver.page_source
+            emailFinding(pgEmails, pgSrc)
+            thisSiteIter += 1
+            totalSiteIter += 1
+            containerLoop = False
+            totalEmails.append(pgEmails)
+            if totalSiteCheck(): break
             break
-        except:
-            y += 1
-            pass
-        if success >= 5: break
-    while z:
+        except Exception: pass
+    thisSiteIter = 0
+    while pastPageLoop:
         try:
-            htag = driver.find_elements(By.TAG_NAME, value='a')[f]
-            g = htag.get_attribute('href')
-            driver.get(g)
-            pg = driver.page_source
-            for match in re.finditer(ex, pg):
-                emails.append(match.group())
-            f += 1
+            websiteLink = driver.find_elements(By.TAG_NAME, value='a')[thisSiteIter].get_attribute('href')
+            driver.get(websiteLink)
+            if driver.current_url == 'data:,': continue
+            if totalSiteCheck(): break
+            pgEmails = []
+            pgSrc = driver.page_source
+            emailFinding(pgEmails, pgSrc)
+            thisSiteIter += 1
+            totalSiteIter += 1
+            if pgEmails != [] or '': totalEmails.append(pgEmails)
             driver.back()
         except Exception:
-            for i, fix in enumerate(emails):
-                if fix not in printed:
-                    print(fix)
-                    printed.append(fix)
-            print('NO MORE HREFS')
-            l = True
-            f = 0
+            containerLoop = True
+            pastPageLoop = False
             driver.back()
-            z = False
-
-# end driver
 driver.quit()
+
+print(totalEmails)
