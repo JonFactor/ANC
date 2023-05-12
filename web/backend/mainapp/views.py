@@ -1,5 +1,5 @@
 from django.shortcuts import render
-
+from django.shortcuts import redirect
 # Create your views here.
 
 def mainapp(request):
@@ -45,7 +45,7 @@ def scrap(request, search="random emails"):
     driver.get('https://www.google.com/search?q='+search)
 
     # meat
-    
+
     while l:
         j = True
         success = 0
@@ -90,7 +90,7 @@ def scrap(request, search="random emails"):
     driver.quit()
 
     # handle results
-    
+    redirect('/')
     return driver
 
 
