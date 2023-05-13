@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.shortcuts import redirect
+from django.views.decorators.csrf import  csrf_protect 
 # Create your views here.
 
+@csrf_protect 
 def mainapp(request):
     return render(request, 'mainapp.html', {})
 
@@ -18,7 +20,12 @@ import re
 #models
 from .models import Result
 
-def scrap(request, perPgLimit = 3, siteLimit = 5, search="random emails"):
+@ csrf_protect 
+def scrap(request):
+
+    siteLimit = request.POST.get('page')
+    search = request.POST.get('search')
+    perPgLimit = request.POST.get('email')
 
     # driver stuff
     options = Options()
@@ -35,7 +42,7 @@ def scrap(request, perPgLimit = 3, siteLimit = 5, search="random emails"):
 
     def emailFinding(pgEmails, pgSrc):
         for match in re.finditer(regexEmail, pgSrc):
-            if len(pgEmails) >= perPgLimit: break
+            if len(pgEmails) >= int(perPgLimit): break
             else: pgEmails.append(match.group())
 
     driver.get('https://www.google.com/search?q='+search)
@@ -55,9 +62,9 @@ def scrap(request, perPgLimit = 3, siteLimit = 5, search="random emails"):
                 if totalSiteIter >= siteLimit: 
                     if pgEmails != [] or '' or pgEmails not in totalEmails: 
                         totalEmails.append(pgEmails)
-                        initialPageLoop = False
-                        pastPageLoop = False
-                        containerLoop = False
+                    initialPageLoop = False
+                    pastPageLoop = False
+                    containerLoop = False
                     break
                 break
             except Exception: pass
@@ -69,9 +76,9 @@ def scrap(request, perPgLimit = 3, siteLimit = 5, search="random emails"):
                 if totalSiteIter >= siteLimit: 
                     if pgEmails != [] or '' or pgEmails not in totalEmails: 
                         totalEmails.append(pgEmails)
-                        initialPageLoop = False
-                        pastPageLoop = False
-                        containerLoop = False
+                    initialPageLoop = False
+                    pastPageLoop = False
+                    containerLoop = False
                     break
                 pgEmails = []
                 pgSrc = driver.page_source

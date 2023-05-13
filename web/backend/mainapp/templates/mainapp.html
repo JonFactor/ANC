@@ -84,12 +84,14 @@
                             background: greenyellow;
                         }
                     </style>
-                    <form type="post">
-                        <input type="text" placeholder="Pages to Webscrape" name="pages"></input>
-                        <input type="text" placeholder="Emails per Page" name="emails"></input>
-                        <button id="btn-form" type="submit">Update</button>
+                    <form method="POST" action='{% url 'scrap' %}'>
+                        {% csrf_token %}
+                        <input type="number" placeholder="Pages to Webscrape" name="page"></input>
+                        <input type="number" placeholder="Emails per Page" name="email"></input>
+                        <input type='text' placeholder='Keyword Search' name='search'></input>
+                        <button id="btn-form" type="submit" value='update'>Update</button>
                     </form>
-                    <a href={/scrap/} style="text-decoration: none;"
+                    <a href='/scrap/' style="text-decoration: none;"
                         class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">Extract
                     </a>
                 </div>

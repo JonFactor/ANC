@@ -29,6 +29,7 @@ pastPageLoop = True
 containerLoop = True
 
 # params
+unqiueSiteLimit = 3
 perPgLimit = 5
 siteLimit = 3
 search="random emails"
@@ -71,7 +72,7 @@ while containerLoop:
             totalSiteIter += 1
             containerLoop = False
             totalEmails.append(pgEmails)
-            if totalSiteCheck(): break
+            # if totalSiteCheck(): break
             break
         except Exception: pass
     thisSiteIter = 0
@@ -80,7 +81,7 @@ while containerLoop:
             websiteLink = driver.find_elements(By.TAG_NAME, value='a')[thisSiteIter].get_attribute('href')
             driver.get(websiteLink)
             if driver.current_url == 'data:,': continue
-            if totalSiteCheck(): break
+            # if totalSiteCheck(): break
             pgEmails = []
             pgSrc = driver.page_source
             emailFinding(pgEmails, pgSrc)
