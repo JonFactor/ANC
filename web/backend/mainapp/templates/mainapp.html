@@ -86,8 +86,7 @@
                     </style>
                     <form method="POST" action='{% url 'scrap' %}'>
                         {% csrf_token %}
-                        <input type="number" placeholder="Pages to Webscrape" name="page"></input>
-                        <input type="number" placeholder="Emails per Page" name="email"></input>
+                        <input type="number" placeholder="Total Emails" name="page"></input>
                         <input type='text' placeholder='Keyword Search' name='search'></input>
                         <button id="btn-form" type="submit" value='update'>Update</button>
                     </form>
@@ -95,6 +94,7 @@
                         class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">Extract
                     </a>
                 </div>
+                <input type="range" min="1" max="100" value="0" ></input>
             </div>
         </div>
     </div>
