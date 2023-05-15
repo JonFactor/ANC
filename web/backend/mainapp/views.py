@@ -17,15 +17,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import re
 
-#models
-from .models import Result
 
 @ csrf_protect 
 def scrap(request):
 
-    siteLimit = request.POST.get('page')
+    totalEmailLimit = int(request.POST.get('page') )
     search = request.POST.get('search')
-    perPgLimit = request.POST.get('email')
 
     # driver stuff
     options = Options()
@@ -42,50 +39,47 @@ def scrap(request):
 
     def emailFinding(pgEmails, pgSrc):
         for match in re.finditer(regexEmail, pgSrc):
-            if len(pgEmails) >= int(perPgLimit): break
-            else: pgEmails.append(match.group())
+            pgEmails.append(match.group())
 
     driver.get('https://www.google.com/search?q='+search)
+    clickSiteIter = 0
     while containerLoop:
         initialPageLoop = True
-        thisSiteIter = 0
         while initialPageLoop:
             try:
-                driver.find_elements(By.TAG_NAME, value='h3')[thisSiteIter].click()
+                driver.find_elements(By.TAG_NAME, value='h3')[clickSiteIter].click()
+                clickSiteIter += 1
                 pgEmails = []
                 pgSrc = driver.page_source
                 emailFinding(pgEmails, pgSrc)
-                thisSiteIter += 1
-                totalSiteIter += 1
-                containerLoop = False
-                totalEmails.append(pgEmails)
-                if totalSiteIter >= siteLimit: 
-                    if pgEmails != [] or '' or pgEmails not in totalEmails: 
-                        totalEmails.append(pgEmails)
-                    initialPageLoop = False
-                    pastPageLoop = False
-                    containerLoop = False
-                    break
+                if pgEmails != [] or '' or pgEmails not in totalEmails: 
+                    totalSiteIter += len(pgEmails)
+                    pgEmails = pgEmails[:totalEmailLimit]
+                    totalEmails.append(pgEmails)
                 break
-            except Exception: pass
-        thisSiteIter = 0
+            except Exception: break
+        hrefSiteIter = 0
+        pastPageLoop = True
         while pastPageLoop:
             try:
-                driver.get(driver.find_elements(By.TAG_NAME, value='a')[thisSiteIter].get_attribute('href'))
+                link = driver.find_elements(By.TAG_NAME, value='a')[hrefSiteIter].get_attribute('href')
+                driver.get(link)
                 if driver.current_url == 'data:,': continue
-                if totalSiteIter >= siteLimit: 
-                    if pgEmails != [] or '' or pgEmails not in totalEmails: 
-                        totalEmails.append(pgEmails)
-                    initialPageLoop = False
-                    pastPageLoop = False
-                    containerLoop = False
-                    break
+                hrefSiteIter += 1
                 pgEmails = []
                 pgSrc = driver.page_source
                 emailFinding(pgEmails, pgSrc)
-                thisSiteIter += 1
-                totalSiteIter += 1
-                if pgEmails != [] or '': totalEmails.append(pgEmails)
+                print('23333')
+                if pgEmails != [] or '' or pgEmails not in totalEmails: 
+                    totalSiteIter += len(pgEmails)
+                    pgEmails = pgEmails[:totalEmailLimit]
+                    totalEmails.append(pgEmails)
+                if totalSiteIter > totalEmailLimit: 
+                    print('gay')
+                    containerLoop = False
+                    pastPageLoop = False 
+                    initialPageLoop = False
+                    break
                 driver.back()
             except Exception:
                 containerLoop = True
