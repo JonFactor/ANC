@@ -6,7 +6,7 @@ from selenium.webdriver.chrome.options import Options
 import re
 
 
-totalEmailLimit = 30
+totalEmailLimit = 100
 search = 'random emails'
 
 # driver stuff
@@ -20,38 +20,67 @@ regexEmail = r'''(?:[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_{|
 totalEmails = []
 breaker = True
 
-def emailFinding(pgEmails, pgSrc):
-    for match in re.finditer(regexEmail, pgSrc):
-        pgEmails.append(match.group())
+
+def hrefCheck(href):
+    url = (driver.current_url).split('/')[2]
+    if href == None: return False
+    if url in href:
+        return True
+    else:
+        return False
+
 
 def pageHandle():
     global breaker, totalEmails, driver
 
+    repeats = 0
     pgSrc = driver.page_source
     for match in re.finditer(regexEmail, pgSrc):
         if len(totalEmails) >= totalEmailLimit: 
             breaker = False
             break
-        else:
+        if match.group() not in totalEmails:
             totalEmails.append(match.group())
+        else: 
+            repeats += 1
+            print(repeats)
 
 def handleInsideLinks():
     webstieLinks = driver.find_elements(By.TAG_NAME, 'a')
     websiteHrefs = []
+    rabbitWholeLimit = 20
     for link in webstieLinks:
-        websiteHrefs.append(link.get_attribute('href'))
+        linkHref = link.get_attribute('href')
+        websiteHrefs.append(linkHref)
+    iteration = 0
     for href in websiteHrefs:
-        driver.get(href)
-        pageHandle()
+        if iteration > rabbitWholeLimit: 
+            break
+        if hrefCheck(href):
+            try: 
+                driver.get(href)
+                iteration += 1
+            except Exception: continue
+            pageHandle()
+        else: pass
 
+def getGoogleLinks():
+    containingLinks = driver.find_elements(By.CLASS_NAME, 'yuRUbf')
+    links = []
+    for conatiners in containingLinks:
+        links.append(conatiners.find_element(By.TAG_NAME, 'a').get_attribute('href'))
+    return links
+
+# start
 driver.get('https://www.google.com/search?q='+search)
 
-links = driver.find_elements(By.TAG_NAME, 'h3')
+links = getGoogleLinks()
 for link in links:
-    link.click()            # goto site
+    if not breaker: break
+    driver.get(link) 
     pageHandle()
     handleInsideLinks()
-    driver.get('https://www.google.com/search?q='+search)
-
 
 driver.quit()
+
+print(totalEmails)

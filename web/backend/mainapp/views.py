@@ -15,12 +15,13 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-import re
+import re, time
 
 
 @ csrf_protect 
 def scrap(request):
 
+    # params
     totalEmailLimit = int(request.POST.get('page') )
     search = request.POST.get('search')
 
@@ -28,63 +29,58 @@ def scrap(request):
     options = Options()
     options.headless = False
     options.add_argument("--window-size=1920,1080")
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+    driver = webdriver.Chrome(options=options, executable_path=ChromeDriverManager().install())
 
     #prequeists 
     regexEmail = r'''(?:[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])'''
     totalEmails = []
-    totalSiteIter = 0
-    pastPageLoop = True
-    containerLoop = True
+    breaker = True
 
-    def emailFinding(pgEmails, pgSrc):
-        for match in re.finditer(regexEmail, pgSrc):
-            pgEmails.append(match.group())
-
+    # start
     driver.get('https://www.google.com/search?q='+search)
-    clickSiteIter = 0
-    while containerLoop:
-        initialPageLoop = True
-        while initialPageLoop:
-            try:
-                driver.find_elements(By.TAG_NAME, value='h3')[clickSiteIter].click()
-                clickSiteIter += 1
-                pgEmails = []
-                pgSrc = driver.page_source
-                emailFinding(pgEmails, pgSrc)
-                if pgEmails != [] or '' or pgEmails not in totalEmails: 
-                    totalSiteIter += len(pgEmails)
-                    pgEmails = pgEmails[:totalEmailLimit]
-                    totalEmails.append(pgEmails)
+
+    containingLinks = driver.find_elements(By.CLASS_NAME, 'yuRUbf')
+    links = []
+    for conatiners in containingLinks:
+        links.append(conatiners.find_element(By.TAG_NAME, 'a').get_attribute('href'))
+    for link in links:
+        if not breaker: break
+        driver.get(link) 
+        repeats = 0
+        pgSrc = driver.page_source
+        for match in re.finditer(regexEmail, pgSrc):
+            if len(totalEmails) >= totalEmailLimit: 
+                breaker = False
                 break
-            except Exception: break
-        hrefSiteIter = 0
-        pastPageLoop = True
-        while pastPageLoop:
-            try:
-                link = driver.find_elements(By.TAG_NAME, value='a')[hrefSiteIter].get_attribute('href')
-                driver.get(link)
-                if driver.current_url == 'data:,': continue
-                hrefSiteIter += 1
-                pgEmails = []
-                pgSrc = driver.page_source
-                emailFinding(pgEmails, pgSrc)
-                print('23333')
-                if pgEmails != [] or '' or pgEmails not in totalEmails: 
-                    totalSiteIter += len(pgEmails)
-                    pgEmails = pgEmails[:totalEmailLimit]
-                    totalEmails.append(pgEmails)
-                if totalSiteIter > totalEmailLimit: 
-                    print('gay')
-                    containerLoop = False
-                    pastPageLoop = False 
-                    initialPageLoop = False
+            totalEmails.append(match.group())
+        webstieLinks = driver.find_elements(By.TAG_NAME, 'a')
+        websiteHrefs = []
+        rabbitWholeLimit = 20
+        for link in webstieLinks:
+            linkHref = link.get_attribute('href')
+            websiteHrefs.append(linkHref)
+        iteration = 0
+        for href in websiteHrefs:
+            if iteration > rabbitWholeLimit: 
+                break
+            url = (driver.current_url).split('/')[2]
+            if url in href:
+                try: 
+                    driver.get(href)
+                    iteration += 1
+                except Exception: continue
+            repeats = 0
+            pgSrc = driver.page_source
+            for match in re.finditer(regexEmail, pgSrc):
+                if len(totalEmails) >= totalEmailLimit: 
+                    breaker = False
                     break
-                driver.back()
-            except Exception:
-                containerLoop = True
-                pastPageLoop = False
-                driver.back()
+                if match.group() not in totalEmails:
+                    totalEmails.append(match.group())
+                else: 
+                    repeats += 1
+            else: pass
+
     driver.quit()
 
     return render(request, 'display.html', {'totalEmails': totalEmails})
