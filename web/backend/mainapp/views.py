@@ -64,11 +64,13 @@ def scrap(request):
             if iteration > rabbitWholeLimit: 
                 break
             url = (driver.current_url).split('/')[2]
-            if url in href:
-                try: 
-                    driver.get(href)
-                    iteration += 1
-                except Exception: continue
+            try:
+                if url in href:
+                    try: 
+                        driver.get(href)
+                        iteration += 1
+                    except Exception: continue
+            except Exception: pass
             repeats = 0
             pgSrc = driver.page_source
             for match in re.finditer(regexEmail, pgSrc):
